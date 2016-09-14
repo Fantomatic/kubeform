@@ -1,0 +1,35 @@
+---
+# Traefik ingress controller as a daemonset
+- name: create traefik-ingress-controller file
+  become: yes
+  copy:
+    src: traefik-ingress-controller.yaml
+    dest: "{{ kubernetes_addons_dir }}/traefik-ingress-controller.yaml"
+  tags:
+    - addons
+    - traefik-ingress-controller
+
+- name: create traefik config dir
+  file:
+    path: /etc/traefik
+    state: directory
+    mode: 0755
+  delegate_to: "{{item}}"
+  delegate_facts: True
+  with_items: "{{groups['edge-routers']}}"
+  become: yes
+  tags:
+    - addons
+    - traefik-ingress-controller
+
+- name: create traefik config toml file
+  become: yes
+  copy:
+    src: traefik.toml
+    dest: /etc/traefik/traefik.toml
+  delegate_to: "{{item}}"
+  delegate_facts: True
+  with_items: "{{groups['edge-routers']}}"
+  tags:
+    - addons
+    - traefik-ingress-controller

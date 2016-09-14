@@ -1,0 +1,19 @@
+- name: deploy calico-node service
+  become: yes
+  template:
+    src: calico-node.service.j2
+    dest: /etc/systemd/system/calico-node.service
+  notify:
+    - reload systemd
+    - restart calico-node
+  tags:
+    - kube-worker
+
+- name: ensure calico-node is running
+  become: yes
+  service:
+    name: calico-node
+    state: started
+    enabled: yes
+  tags:
+    - kube-worker

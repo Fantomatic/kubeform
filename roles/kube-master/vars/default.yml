@@ -1,0 +1,3 @@
+# default vars file for region/zone used by local/vagrant setups
+region: local
+zone: local

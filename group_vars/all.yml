@@ -1,0 +1,98 @@
+http_proxy: ''
+proxy_env:
+  http_proxy: "{{ http_proxy }}"
+  https_proxy: "{{ http_proxy }}"
+  HTTP_PROXY: "{{ http_proxy }}"
+  HTTPS_PROXY: "{{ http_proxy }}"
+
+# For baremetal or onpremise when not running terraform
+onpremise: false
+
+coreos_timezone: 'Europe/London'
+etcd_servers_group: etcd_servers
+api_servers_group: masters
+
+# kubernetes docker image
+kubernetes_image: quay.io/coreos/hyperkube
+
+# The docker container version to use for Kubernetes
+kubernetes_version: v1.3.7_coreos.0
+
+# Kubernetes log level. uses glog. See https://github.com/golang/glog
+# 0 - Generally useful for this to ALWAYS be visible to an operator
+#     - Programmer errors
+#     - Logging extra info about a panic
+#     - CLI argument handling
+# 1 - A reasonable default log level if you don't want verbosity.
+#     - Information about config (listening on X, watching Y)
+#     - Errors that repeat frequently that relate to conditions that can be corrected (pod detected as unhealthy)
+# 2 - Useful steady state information about the service and important log messages that may correlate to significant changes in the system. This is the recommended default log level for most systems.
+#     - Logging HTTP requests and their exit code
+#     - System state changing (killing pod)
+#     - Controller state change events (starting pods)
+#     - Scheduler log messages
+# 3 - Extended information about changes
+#     - More info about system state changes
+# 4 - Debug level verbosity (for now)
+#     - Logging in particularly thorny parts of code where you may want to come back later and check it
+kubernetes_log_level: 2
+
+# The CIDR network to use for pod IPs. Each pod launched in the cluster will be
+# assigned an IP out of this range. This network must be routable between all
+# hosts in the cluster. In a default installation, the flannel overlay network
+# will provide routing to this network.
+kubernetes_pod_network: 10.2.0.0/16
+
+# The CIDR network to use for service cluster VIPs (Virtual IPs).
+# Each service will be assigned a cluster IP out of this range.
+# This must not overlap with any IP ranges assigned to the POD_NETWORK,
+# or other existing network infrastructure.
+# Routing to these VIPs is handled by a local kube-proxy service to each host,
+# and are not required to be routable between hosts.
+kubernetes_service_ip_range: 10.3.0.0/24
+
+# The VIP (Virtual IP) address of the Kubernetes API Service.
+# If the SERVICE_IP_RANGE is changed above,
+# this must be set to the first IP in that range.
+kubernetes_service_ip: 10.3.0.1
+
+# The VIP (Virtual IP) address of the cluster DNS service.
+# This IP must be in the range of the SERVICE_IP_RANGE and cannot be the first
+# IP in the range. This same IP must be configured on all worker nodes to
+# enable DNS service discovery.
+kubernetes_dns_service_ip: 10.3.0.10
+
+# The kubelet wrapper script for use on CoreOS. This makes it easy to run the
+# kubelet under rkt (recommended by CoreOS). Ships by default in CoreOS 962.0.0+
+# but we include it here for backwards compatibility in the stable/beta channels.
+# See https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html
+kubernetes_kubelet_wrapper: https://raw.githubusercontent.com/coreos/coreos-overlay/master/app-admin/kubelet-wrapper/files/kubelet-wrapper
+
+# kubernetes config dirs (used by master and worker)
+kubernetes_config_dir: /etc/kubernetes
+kubernetes_cert_dir: "{{ kubernetes_config_dir }}/ssl"
+kubernetes_manifest_dir: "{{ kubernetes_config_dir }}/manifests"
+kubernetes_addons_dir: "{{ kubernetes_config_dir }}/addons"
+kubernetes_users_dir: "{{ kubernetes_config_dir }}/users"
+kubernetes_cni_dir: "{{ kubernetes_config_dir }}/cni/net.d"
+
+# Network CNI plugin to use. Supported:
+# - Calico
+# - Weave
+# - Romana - Coming soon...
+# - OpenContrail - Coming soon...
+network_plugin: 'calico'
+
+# Whether to enable the kubernetes-dashboard
+enable_dashboard: true
+enable_logging: false
+enable_monitoring: false
+
+# DNS domain for SkyDNS + Kubelet
+dns_domain: cluster.local
+
+# Choose a specific ingress-controller. Supported:
+# - traefik
+# - nginx - Coming soon...
+# - vamp - Coming soon...
+ingress_controller: "traefik"

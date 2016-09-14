@@ -1,0 +1,20 @@
+---
+# SkyDNS service addon
+- name: create SkyDNS pod file
+  become: yes
+  template:
+    src: skydns-rc.yaml.j2
+    dest: "{{ kubernetes_addons_dir }}/skydns-rc.yaml"
+  tags:
+    - addons
+    - skydns
+
+- name: create SkyDNS service file
+  become: yes
+  template:
+    src: skydns-svc.yaml.j2
+    dest: "{{ kubernetes_addons_dir }}/skydns-svc.yaml"
+  tags:
+    - addons
+    - skydns
+

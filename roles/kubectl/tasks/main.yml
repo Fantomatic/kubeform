@@ -1,0 +1,33 @@
+---
+- name: download kubectl
+  become: yes
+  become_user: root
+  get_url:
+    url: "{{ kubectl_url }}"
+    dest: "{{ kubectl_bin }}"
+    mode: 0755
+    validate_certs: no
+    force: true
+  environment: "{{ proxy_env }}"
+  tags:
+    - kubectl
+
+- name: Creates kubectl user directory
+  become: yes
+  become_user: root
+  file:
+    path: /root/.kube
+    state: directory
+
+- name: deploy kubectl config
+  become: yes
+  become_user: root
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - src: config.j2
+      dest: /root/.kube/config
+  tags:
+    - kubectl
+

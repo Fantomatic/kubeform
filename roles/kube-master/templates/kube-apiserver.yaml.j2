@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - name: kube-apiserver
+    image: {{ kubernetes_image }}:{{ kubernetes_version }}
+    command:
+    - /hyperkube
+    - apiserver
+    - --allow-privileged=true
+    - --apiserver-count={{ kube_apiserver_count }}
+    - --bind-address={{ kube_apiserver_bind_address }}
+    - --insecure-bind-address=0.0.0.0
+    - --etcd-servers={{ kube_etcd_servers }}
+    - --service-cluster-ip-range={{ kubernetes_service_ip_range }}
+    - --secure-port=443
+    - --insecure_port=8080
+    - --advertise-address={{ ansible_default_ipv4.address }}
+    - --admission-control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+    - --tls-cert-file={{ kubernetes_cert_dir }}/master.pem
+    - --tls-private-key-file={{ kubernetes_cert_dir }}/master-key.pem
+    - --client-ca-file={{ kubernetes_cert_dir }}/ca.pem
+    - --service-account-key-file={{ kubernetes_cert_dir }}/master-key.pem
+    - --basic-auth-file={{ kubernetes_users_dir }}/known_users.csv
+    - --runtime-config=extensions/v1beta1=true,extensions/v1beta1/networkpolicies=true
+    - --v={{ kubernetes_log_level }}
+    ports:
+    - containerPort: 443
+      hostPort: 443
+      name: https
+    - containerPort: 8080
+      hostPort: 8080
+      name: local
+    volumeMounts:
+    - mountPath: {{ kubernetes_users_dir }}
+      name: basic-auth-kubernetes
+      readOnly: true
+    - mountPath: {{ kubernetes_cert_dir }}
+      name: ssl-certs-kubernetes
+      readOnly: true
+    - mountPath: /etc/ssl/certs
+      name: ssl-certs-host
+      readOnly: true
+  volumes:
+  - hostPath:
+      path: {{ kubernetes_users_dir }}
+    name: basic-auth-kubernetes
+  - hostPath:
+      path: {{ kubernetes_cert_dir }}
+    name: ssl-certs-kubernetes
+  - hostPath:
+      path: /usr/share/ca-certificates
+    name: ssl-certs-host

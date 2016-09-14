@@ -1,0 +1,19 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: "{{ kubectl_certificate_authority }}"
+    server: "{{ kubectl_server }}"
+  name: "{{ kubectl_cluster_name }}"
+contexts:
+- context:
+    cluster: "{{ kubectl_context_cluster }}"
+    user: "{{ kubectl_context_user }}"
+  name: "{{ kubectl_context_name }}"
+current-context: "{{ kubectl_context_current }}"
+kind: Config
+preferences: {}
+users:
+- name: "{{ kubectl_users_name }}"
+  user:
+    client-certificate: "{{ kubectl_client_certificate }}"
+    client-key: "{{ kubectl_client_key }}"

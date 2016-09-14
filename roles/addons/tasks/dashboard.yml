@@ -1,0 +1,20 @@
+---
+# create kubernetes-dashboard
+- name: create dashboard deployment file
+  become: yes
+  copy:
+    src: dashboard-deployment.yaml
+    dest: "{{ kubernetes_addons_dir }}/dashboard-deployment.yaml"
+  tags:
+    - addons
+    - dashboard
+
+- name: create dashboard service file
+  become: yes
+  copy:
+    src: dashboard-svc.yaml
+    dest: "{{ kubernetes_addons_dir }}/dashboard-svc.yaml"
+  tags:
+    - addons
+    - dashboard
+

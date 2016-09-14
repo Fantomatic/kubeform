@@ -1,0 +1,19 @@
+- name: bootstrap coreos hosts
+  hosts: all:!role=bastion
+  gather_facts: False
+  environment: "{{ proxy_env }}"
+  roles:
+    - { role: coreos_bootstrap, when: onpremise|bool }
+    - coreos_timezone
+
+- name: Install pip packages
+  hosts: all:!role=bastion
+  gather_facts: False
+  environment: "{{ proxy_env }}"
+  tasks:
+    - pip:
+        name: docker-py
+        version: 1.9.0
+    - pip:
+        name: pyyaml
+        version: 3.11

@@ -1,0 +1,108 @@
+# provider is set in the inventory
+- include_vars: "{{ item }}"
+  with_first_found:
+   - "{{ provider }}.yml"
+   - "default.yml"
+
+- name: create kubernetes dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  with_items:
+    - "{{ kubernetes_config_dir }}"
+    - "{{ kubernetes_addons_dir }}"
+    - "{{ kubernetes_manifest_dir }}"
+    - "{{ kubernetes_cni_dir }}"
+  become: yes
+  tags:
+    - kube-master
+
+# kubelet-wrapper is only available on CoreOS 962.0.0+ so we make sure its here
+# to ensure backwards compatability.
+# See https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html
+- name: download kubelet-wrapper
+  become: yes
+  get_url:
+    url: "{{ kubernetes_kubelet_wrapper }}"
+    dest: /opt/bin/kubelet-wrapper
+    mode: 0775
+  tags:
+    - kube-master
+
+- name: create service account users
+  become: yes
+  lineinfile:
+    dest: "{{ kubernetes_users_dir }}/known_users.csv"
+    create: yes
+    line: '{{ item.value.pass }},{{ item.key }},{{ item.value.role }}'
+  with_dict: "{{ kube_users }}"
+  notify:
+    - restart kubelet
+  tags:
+    - kube-master
+
+# master
+- name: deploy kubelet service
+  become: yes
+  template:
+    src: kubelet.service.j2
+    dest: /etc/systemd/system/kubelet.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload systemd
+    - restart kubelet
+  tags:
+    - kube-master
+
+- name: ensure kubelet is running
+  become: yes
+  service:
+    name: kubelet
+    state: started
+    enabled: yes
+  tags:
+    - kube-master
+
+- name: deploy kube-master manifests
+  become: yes
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - src: kube-proxy.yaml.j2
+      dest: "{{ kubernetes_manifest_dir }}/kube-proxy.yaml"
+    - src: kube-apiserver.yaml.j2
+      dest: "{{ kubernetes_manifest_dir }}/kube-apiserver.yaml"
+    - src: kube-controller-manager.yaml.j2
+      dest: "{{ kubernetes_manifest_dir }}/kube-controller-manager.yaml"
+    - src: kube-scheduler.yaml.j2
+      dest: "{{ kubernetes_manifest_dir }}/kube-scheduler.yaml"
+    - src: master-kubeconfig.j2
+      dest: "{{ kubernetes_config_dir }}/master-kubeconfig"
+    - src: policy-controller.yaml.j2
+      dest: "{{ kubernetes_manifest_dir }}/policy-controller.yaml"
+    - src: "10-{{ network_plugin }}.conf.j2"
+      dest: "{{ kubernetes_cni_dir }}/10-{{ network_plugin }}.conf"
+  notify:
+    - reload systemd
+    - restart kubelet
+    - restart calico-node
+  tags:
+    - kube-master
+
+- name: wait for kube-apiserver up
+  wait_for:
+    port: 8080
+  tags:
+    - kube-master
+
+- include: calico.yml
+  tags:
+    - calico
+    - kube-master

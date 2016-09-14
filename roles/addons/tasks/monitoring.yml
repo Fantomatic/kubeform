@@ -1,0 +1,49 @@
+---
+
+# heapster
+- name: create heapster-controller file
+  become: yes
+  template:
+    src: heapster-controller.yaml.j2
+    dest: "{{ kubernetes_addons_dir }}/heapster-controller.yaml"
+  tags:
+    - addons
+    - monitoring
+
+- name: create heapster-service file
+  become: yes
+  copy:
+    src: heapster-service.yaml
+    dest: "{{ kubernetes_addons_dir }}/heapster-service.yaml"
+  tags:
+    - addons
+    - monitoring
+
+# influxdb
+- name: create influxdb-grafana-controller file
+  become: yes
+  copy:
+    src: influxdb-grafana-controller.yaml
+    dest: "{{ kubernetes_addons_dir }}/influxdb-grafana-controller.yaml"
+  tags:
+    - addons
+    - monitoring
+
+- name: create influxdb-service file
+  become: yes
+  copy:
+    src: influxdb-service.yaml
+    dest: "{{ kubernetes_addons_dir }}/influxdb-service.yaml"
+  tags:
+    - addons
+    - monitoring
+
+# Grafana
+- name: create grafana-service file
+  become: yes
+  copy:
+    src: grafana-service.yaml
+    dest: "{{ kubernetes_addons_dir }}/grafana-service.yaml"
+  tags:
+    - addons
+    - monitoring

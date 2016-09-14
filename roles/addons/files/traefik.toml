@@ -1,0 +1,26 @@
+#defaultEntryPoints = ["http", "https"]
+defaultEntryPoints = ["http"]
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+#  [entryPoints.https]
+#  address = ":443"
+#    [entryPoints.https.tls]
+
+# Uncomment this for letsencrypt configuration
+# See https://docs.traefik.io/toml/#acme-lets-encrypt-configuration for more info
+
+# [acme]
+# email = "test@test.com"
+
+# storageFile = "/etc/traefik/acme.json"
+
+# entryPoint = "https"
+
+# onDemand = true
+
+# caServer = "https://acme-staging.api.letsencrypt.org/directory"
+
+# [[acme.domains]]
+#   main = "your-domain"

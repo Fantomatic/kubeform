@@ -1,0 +1,2 @@
+region: "{{ hostvars[inventory_hostname].region }}"
+zone: "{{ hostvars[inventory_hostname].region }}"

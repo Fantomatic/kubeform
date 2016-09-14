@@ -1,0 +1,29 @@
+---
+# defaults file for addons
+
+# determines if we are on the first master instance.
+is_first_master: "{% if inventory_hostname == groups['masters'][0] %}true{% else %}false{% endif %}"
+
+# skydns
+dns_replicas: 1
+
+kubectl_bin: /opt/bin/kubectl
+
+# Heapster monitoring
+base_metrics_memory: "140Mi"
+metrics_memory_initial: 200
+metrics_memory_per_node: 4
+metrics_memory: "{{ metrics_memory_initial + (metrics_memory_per_node * (groups['all'] | length | int)) }}Mi"
+
+base_eventer_memory: "190Mi"
+eventer_memory_initial: 200
+eventer_memory_per_node: 500
+eventer_memory: "{{ eventer_memory_initial + (eventer_memory_per_node * (groups['all'] | length | int)) }}Ki"
+
+nanny_memory_per_node: 200
+nanny_memory: "{{ (200 * 1024 + (groups['all'] | length | int) * nanny_memory_per_node) }}Ki" 
+
+base_metrics_cpu: "80m"
+metrics_cpu_per_node: 0.5
+metrics_cpu: "{{ (80 + (groups['all'] | length | int) * metrics_cpu_per_node)|string }}m" 
+grains: ""

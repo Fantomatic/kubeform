@@ -1,0 +1,47 @@
+# Fluentd
+- name: create fluentd-logging-ds file
+  become: yes
+  copy:
+    src: fluentd-logging-ds.yaml
+    dest: "{{ kubernetes_addons_dir }}/fluentd-logging-ds.yaml"
+  tags:
+    - addons
+    - logging
+
+# Elasticsearch
+- name: create es-controller file
+  become: yes
+  copy:
+    src: es-controller.yaml
+    dest: "{{ kubernetes_addons_dir }}/es-controller.yaml"
+  tags:
+    - addons
+    - logging
+
+- name: create es-service file
+  become: yes
+  copy:
+    src: es-service.yaml
+    dest: "{{ kubernetes_addons_dir }}/es-service.yaml"
+  tags:
+    - addons
+    - logging
+
+# Kibana
+- name: create kibana-controller file
+  become: yes
+  copy:
+    src: kibana-controller.yaml
+    dest: "{{ kubernetes_addons_dir }}/kibana-controller.yaml"
+  tags:
+    - addons
+    - logging
+
+- name: create kibana-service file
+  become: yes
+  copy:
+    src: kibana-service.yaml
+    dest: "{{ kubernetes_addons_dir }}/kibana-service.yaml"
+  tags:
+    - addons
+    - logging

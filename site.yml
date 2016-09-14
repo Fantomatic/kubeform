@@ -1,0 +1,44 @@
+---
+- hosts: all:!role=bastion
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: "PATH=/home/core/bin:$PATH python"
+  tasks:
+    - name: Wait for ssh port to become available from bastion server.
+      wait_for:
+        port: "{{ ansible_port }}"
+        host: "{{ ansible_host }}"
+        delay: 10
+        timeout: 180
+      delegate_to: "{{ bastion_ip }}"
+      sudo: False
+      when: bastion_ip is defined
+    - name: Wait for port 22 to become available from local server.
+      local_action: "wait_for port={{ ansible_port }} host={{ ansible_host }} delay=10 timeout=180"
+      sudo: False
+      when: bastion_ip is not defined
+
+- include: playbooks/coreos-bootstrap.yml
+
+- hosts: all
+  roles:
+    - docker
+
+- hosts: masters
+  roles:
+    - kubectl
+    - kube-master
+    - addons
+
+- hosts: workers
+  roles:
+    - kube-worker
+
+- hosts: edge-routers
+  vars:
+    schedulable: false
+    node_labels: "role=edge-router"
+  roles:
+    - kube-worker
+
+- include: helm.yml

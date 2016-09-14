@@ -1,0 +1,15 @@
+---
+# defaults file for docker
+docker_tmp_dir: /var/lib/docker/tmp
+docker_dns_config: ''
+docker_storage_config: --storage-driver=overlay
+docker_endpoints: "-H=tcp://0.0.0.0:2376 -H=unix:///var/run/docker.sock"
+docker_bridge_ip: ''
+docker_proxy_exceptions: ''
+docker_registry: ''
+private_docker_registry: false
+docker_content_trust: 1
+docker_tls: "--tlsverify --tlscacert=/etc/docker/ca.pem --tlscert=/etc/docker/server.pem --tlskey=/etc/docker/server-key.pem"
+docker_customisations: "{{ docker_endpoints }} {{ docker_tls }} {{ docker_bridge_ip }} {{ docker_storage_config }} {{ docker_dns_config }} {{ docker_registry }}"
+
+

@@ -1,0 +1,30 @@
+---
+- include: skydns.yml
+  when: is_first_master|bool
+
+- include: dashboard.yml
+  when: enable_dashboard and is_first_master|bool
+
+- include: "{{ ingress_controller }}.yml"
+  when: is_first_master|bool
+
+- include: logging.yml
+  when: enable_logging and is_first_master|bool
+
+- include: monitoring.yml
+  when: enable_monitoring and is_first_master|bool
+
+#- include: registry.yml
+#  when: setup_docker_registry and is_first_master|bool
+
+- name: Create addons
+  run_once: true
+  become: yes
+  kube:
+    filename: "{{ kubernetes_addons_dir }}"
+    state: present
+  run_once: true
+  tags:
+    - addons
+    - kubernetes
+    - create-addons
